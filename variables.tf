@@ -31,7 +31,7 @@ variable "availability_zones" {
 # AMI ID
 variable "ami_id" {
   description = "The AMI ID to use for instances."
-  default     = "ami-03b9bf7822474e16b" # Replace with the desired AMI ID
+  default     = "ami-0a0e5d9c7acc336f1" # Replace with the desired AMI ID
 }
 
 # Bastion Instance Type
