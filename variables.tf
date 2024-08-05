@@ -49,5 +49,5 @@ variable "private_instance_type" {
 # SSH Key Name
 variable "key_name" {
   description = "The SSH key name to use for instances."
-  default     = "test1" # Replace with your SSH key name
+  default     = "vinay1" # Replace with your SSH key name
 }
