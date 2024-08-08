@@ -7,7 +7,7 @@ variable "aws_region" {
 # VPC CIDR Block
 variable "vpc_cidr_block" {
   description = "The CIDR block for the VPC."
-  default     = "172.31.0.0/16"
+  default     = "10.0.0.0/16"
 }
 
 # Public Subnet Count
