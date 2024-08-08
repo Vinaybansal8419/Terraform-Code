@@ -1,6 +1,5 @@
 output "vpc_id" {
-  description = "The ID of the VPC"
-  value       = aws_default_vpc.default.id
+  value = aws_vpc.nginx_vpc.id
 }
 
 output "public_subnet_id" {
