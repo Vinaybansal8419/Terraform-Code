@@ -2,20 +2,22 @@ provider "aws" {
   region = var.aws_region
 }
 
-# Use the default VPC
-resource "aws_default_vpc" "default" {
+# Custom VPC
+resource "aws_vpc" "nginx_vpc" {
+  cidr_block           = "10.0.0.0/16" # Adjust CIDR block as needed
   enable_dns_support   = true
   enable_dns_hostnames = true
+
   tags = {
-    Name = "Default VPC"
+    Name = "nginx-vpc"
   }
 }
 
 # Public Subnet
 resource "aws_subnet" "nginx_pub_subnet" {
   count                   = 1
-  vpc_id                  = aws_default_vpc.default.id
-  cidr_block              = cidrsubnet(aws_default_vpc.default.cidr_block, 8, 0)
+  vpc_id                  = aws_vpc.nginx_vpc.id
+  cidr_block              = cidrsubnet(aws_vpc.nginx_vpc.cidr_block, 8, 0)
   availability_zone       = var.availability_zones[count.index]
   map_public_ip_on_launch = true
 
@@ -27,8 +29,8 @@ resource "aws_subnet" "nginx_pub_subnet" {
 # Private Subnets
 resource "aws_subnet" "nginx_priv_subnet" {
   count                   = 2
-  vpc_id                  = aws_default_vpc.default.id
-  cidr_block              = cidrsubnet(aws_default_vpc.default.cidr_block, 8, count.index + 1)
+  vpc_id                  = aws_vpc.nginx_vpc.id
+  cidr_block              = cidrsubnet(aws_vpc.nginx_vpc.cidr_block, 8, count.index + 1)
   availability_zone       = var.availability_zones[count.index]
   map_public_ip_on_launch = false
 
@@ -39,7 +41,7 @@ resource "aws_subnet" "nginx_priv_subnet" {
 
 # Internet Gateway
 resource "aws_internet_gateway" "nginx_igw" {
-  vpc_id = aws_default_vpc.default.id
+  vpc_id = aws_vpc.nginx_vpc.id
 
   tags = {
     Name = "nginx-igw-01"
@@ -48,7 +50,7 @@ resource "aws_internet_gateway" "nginx_igw" {
 
 # Public Route Table
 resource "aws_route_table" "nginx_route_pub" {
-  vpc_id = aws_default_vpc.default.id
+  vpc_id = aws_vpc.nginx_vpc.id
 
   route {
     cidr_block = "0.0.0.0/0"
@@ -81,7 +83,7 @@ resource "aws_nat_gateway" "nginx_nat" {
 
 # Private Route Table
 resource "aws_route_table" "nginx_route_priv" {
-  vpc_id = aws_default_vpc.default.id
+  vpc_id = aws_vpc.nginx_vpc.id
 
   route {
     cidr_block     = "0.0.0.0/0"
@@ -101,7 +103,7 @@ resource "aws_route_table_association" "nginx_route_priv_assoc" {
 
 # Security Groups
 resource "aws_security_group" "bastion_sg" {
-  vpc_id = aws_default_vpc.default.id
+  vpc_id = aws_vpc.nginx_vpc.id
 
   egress {
     from_port   = 0
@@ -123,14 +125,13 @@ resource "aws_security_group" "bastion_sg" {
     protocol    = -1
     cidr_blocks = ["0.0.0.0/0"]
   }
-
   tags = {
     Name = "bastion_sg"
   }
 }
 
 resource "aws_security_group" "private_sg" {
-  vpc_id = aws_default_vpc.default.id
+  vpc_id = aws_vpc.nginx_vpc.id
 
   ingress {
     from_port       = 22
